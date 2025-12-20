@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-brand">
+            <h2>Admin Panel</h2>
+        </div>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-item">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin.admin_products') }}" class="nav-item">
+                <span class="icon">📦</span>
+                <span>Products</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <span class="icon">🛍️</span>
+                <span>Orders</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="icon">👥</span>
+                <span>Users</span>
+            </a>
+            <a href="{{ url_for('main.index') }}" class="nav-item">
+                <span class="icon">🏠</span>
+                <span>Back to Store</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-header">
+            <h1>Order Management</h1>
+            <div class="header-stats">
+                <div class="stat-mini">
+                    <span class="stat-label">Pending:</span>
+                    <span class="stat-number">{{ pending_count or 0 }}</span>
+                </div>
+                <div class="stat-mini">
+                    <span class="stat-label">Processing:</span>
+                    <span class="stat-number">{{ processing_count or 0 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-filters">
+            <div class="filter-group">
+                <input type="text" id="searchOrders" placeholder="Search by order # or customer..." class="form-control">
+                <select class="form-control" id="filterStatus" onchange="filterOrders()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select class="form-control" id="filterDate">
+                    <option value="">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="orders-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    {% if orders %}
+                        {% for order in orders %}
+                            <tr data-order-id="{{ order.id }}" data-status="{{ order.status }}">
+                                <td>
+                                    <strong>#{{ order.order_number }}</strong>
+                                </td>
+                                <td>
+                                    <div class="customer-info">
+                                        <strong>{{ order.user.username }}</strong>
+                                        <br><small>{{ order.user.email }}</small>
+                                    </div>
+                                </td>
+                                <td>{{ order.created_at.strftime('%b %d, %Y') }}<br><small>{{ order.created_at.strftime('%I:%M %p') }}</small></td>
+                                <td class="text-center">{{ order.order_items.count() }}</td>
+                                <td><strong>${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                                <td>
+                                    <span class="payment-badge payment-{{ order.payment_status }}">
+                                        {{ order.payment_status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <select class="status-select status-{{ order.status }}" onchange="updateOrderStatus({{ order.id }}, this.value)">
+                                        <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                        <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                        <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                        <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                        <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon" onclick="viewOrderDetails({{ order.id }})" title="View Details">👁️</button>
+                                        <button class="btn-icon" onclick="printInvoice({{ order.id }})" title="Print Invoice">🖨️</button>
+                                        <button class="btn-icon" onclick="sendNotification({{ order.id }})" title="Send Notification">📧</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No orders found</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if orders and orders.pages > 1 %}
+            <div class="pagination">
+                {% if orders.has_prev %}
+                    <a href="?page={{ orders.prev_num }}" class="btn btn-secondary">Previous</a>
+                {% endif %}
+                <span class="page-info">Page {{ orders.page }} of {{ orders.pages }}</span>
+                {% if orders.has_next %}
+                    <a href="?page={{ orders.next_num }}" class="btn btn-secondary">Next</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </main>
+</div>
+
+<!-- Order Details Modal -->
+<div id="orderModal" class="modal">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h2 id="orderModalTitle">Order Details</h2>
+            <span class="close" onclick="closeOrderModal()">&times;</span>
+        </div>
+        <div class="modal-body" id="orderModalBody">
+            <!-- Order details will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterOrders() {
+    const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
+    const statusFilter = document.getElementById('filterStatus').value;
+    
+    const rows = document.querySelectorAll('#ordersTableBody tr');
+    rows.forEach(row => {
+        const orderNum = row.querySelector('td:first-child').textContent.toLowerCase();
+        const customer = row.querySelector('.customer-info').textContent.toLowerCase();
+        const status = row.dataset.status;
+        
+        const matchesSearch = orderNum.includes(searchTerm) || customer.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        
+        row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+    });
+}
+
+document.getElementById('searchOrders').addEventListener('input', filterOrders);
+
+function updateOrderStatus(orderId, newStatus) {
+    if (confirm(`Update order status to "${newStatus}"?`)) {
+        // AJAX request would go here
+        fetch(`/admin/orders/${orderId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Order status updated successfully!');
+                location.reload();
+            } else {
+                alert('Failed to update order status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Status update functionality needs backend implementation.');
+        });
+    }
+}
+
+function viewOrderDetails(orderId) {
+    window.location.href = `/orders/${orderId}`;
+}
+
+function printInvoice(orderId) {
+    window.open(`/admin/orders/${orderId}/invoice`, '_blank');
+}
+
+function sendNotification(orderId) {
+    if (confirm('Send order update notification to customer?')) {
+        alert('Email notification feature coming soon! Order ID: ' + orderId);
+    }
+}
+
+function closeOrderModal() {
+    document.getElementById('orderModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('orderModal');
+    if (event.target === modal) {
+        closeOrderModal();
+    }
+}
+</script>
+{% endblock %}

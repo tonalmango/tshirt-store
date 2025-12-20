@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: tshirt-store
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT 'app:create_app()'
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///tshirt_store.db
+      - key: FLASK_ENV
+        value: production

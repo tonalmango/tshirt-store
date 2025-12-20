@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - T-Shirt Store{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-wrapper">
+        <div class="checkout-main">
+            <h1>Checkout</h1>
+            
+            <div class="checkout-steps">
+                <div class="step active">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Shipping</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Payment</span>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Review</span>
+                </div>
+            </div>
+
+            <form method="POST" class="checkout-form" id="checkoutForm">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-section">
+                    <h2>Shipping Information</h2>
+                    <div class="form-group">
+                        {{ form.shipping_address.label(class="form-label") }}
+                        {{ form.shipping_address(class="form-control", rows="4", placeholder="Street Address\nCity, State ZIP\nCountry") }}
+                        {% if form.shipping_address.errors %}
+                            <div class="form-errors">
+                                {% for error in form.shipping_address.errors %}
+                                    <span class="error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" id="sameAsBilling" checked>
+                        <label for="sameAsBilling">Billing address same as shipping</label>
+                    </div>
+
+                    <div id="billingSection" style="display: none;">
+                        <h3>Billing Information</h3>
+                        <div class="form-group">
+                            {{ form.billing_address.label(class="form-label") }}
+                            {{ form.billing_address(class="form-control", rows="4") }}
+                            {% if form.billing_address.errors %}
+                                <div class="form-errors">
+                                    {% for error in form.billing_address.errors %}
+                                        <span class="error">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Payment Method</h2>
+                    <div class="form-group">
+                        {{ form.payment_method.label(class="form-label") }}
+                        {{ form.payment_method(class="form-control payment-select") }}
+                        {% if form.payment_method.errors %}
+                            <div class="form-errors">
+                                {% for error in form.payment_method.errors %}
+                                    <span class="error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="payment-info">
+                        <p class="info-text">
+                            <i>ℹ️</i> This is a demo store. No real payment will be processed.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('cart.view_cart') }}" class="btn btn-secondary">Back to Cart</a>
+                    <button type="submit" class="btn btn-primary btn-large">Place Order</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="checkout-sidebar">
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-items">
+                    {% for item in cart_items %}
+                        <div class="summary-item">
+                            <img src="{{ url_for('static', filename=item.product.image_url) if item.product.image_url else url_for('static', filename='images/placeholder.jpg') }}" alt="{{ item.product.name }}">
+                            <div class="item-details">
+                                <h4>{{ item.product.name }}</h4>
+                                <p>Qty: {{ item.quantity }}</p>
+                            </div>
+                            <span class="item-price">${{ "%.2f"|format(item.total_price) }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="summary-totals">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>${{ "%.2f"|format(cart_total) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax:</span>
+                        <span>${{ "%.2f"|format(cart_total * 0.08) }}</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span>${{ "%.2f"|format(cart_total * 1.08) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sameAsBillingCheckbox = document.getElementById('sameAsBilling');
+    const billingSection = document.getElementById('billingSection');
+    const shippingAddress = document.querySelector('[name="shipping_address"]');
+    const billingAddress = document.querySelector('[name="billing_address"]');
+
+    sameAsBillingCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            billingSection.style.display = 'none';
+            billingAddress.value = shippingAddress.value;
+        } else {
+            billingSection.style.display = 'block';
+        }
+    });
+
+    shippingAddress.addEventListener('input', function() {
+        if (sameAsBillingCheckbox.checked) {
+            billingAddress.value = this.value;
+        }
+    });
+
+    const checkoutForm = document.getElementById('checkoutForm');
+    checkoutForm.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+    });
+});
+</script>
+{% endblock %}

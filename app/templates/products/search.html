@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - T-Shirt Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="search-page">
+        <div class="search-header">
+            <h1>Search Results</h1>
+            <form action="{{ url_for('main.products_list') }}" method="GET" class="search-form-inline">
+                <div class="search-input-group">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search for products..." class="search-input">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+            <p class="search-info">
+                {% if results %}
+                    Found {{ results|length }} result(s) for "{{ search_query }}"
+                {% else %}
+                    No results found for "{{ search_query }}"
+                {% endif %}
+            </p>
+        </div>
+
+        {% if results %}
+            <div class="results-container">
+                <div class="filter-sidebar">
+                    <h3>Refine Results</h3>
+                    
+                    <div class="filter-section">
+                        <h4>Categories</h4>
+                        <div class="filter-options">
+                            {% for category in categories %}
+                                <label class="filter-checkbox">
+                                    <input type="checkbox" name="category" value="{{ category.id }}" onchange="filterResults()">
+                                    <span>{{ category.name }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>Price Range</h4>
+                        <div class="price-range">
+                            <input type="range" id="priceRange" min="0" max="100" value="100" onchange="updatePriceFilter(this.value)">
+                            <p>Up to $<span id="priceValue">100</span></p>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <h4>Sort By</h4>
+                        <select class="form-control" onchange="sortResults(this.value)">
+                            <option value="relevance">Relevance</option>
+                            <option value="price_low">Price: Low to High</option>
+                            <option value="price_high">Price: High to Low</option>
+                            <option value="newest">Newest First</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-secondary btn-full" onclick="clearFilters()">Clear Filters</button>
+                </div>
+
+                <div class="results-grid">
+                    {% for product in results %}
+                        <div class="product-card" data-price="{{ product.final_price }}" data-category="{{ product.category_id }}">
+                            <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="product-link">
+                                <div class="product-image">
+                                    <img src="{{ url_for('static', filename=product.image_url) if product.image_url else url_for('static', filename='images/placeholder.jpg') }}" alt="{{ product.name }}">
+                                    {% if product.discounted_price %}
+                                        <span class="discount-badge">-{{ product.discount_percentage }}%</span>
+                                    {% endif %}
+                                </div>
+                                <div class="product-info">
+                                    <h3>{{ product.name }}</h3>
+                                    <p class="product-description">{{ product.description[:80] }}...</p>
+                                    <div class="product-price">
+                                        {% if product.discounted_price %}
+                                            <span class="original-price">${{ "%.2f"|format(product.price) }}</span>
+                                            <span class="sale-price">${{ "%.2f"|format(product.discounted_price) }}</span>
+                                        {% else %}
+                                            <span class="current-price">${{ "%.2f"|format(product.price) }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="product-actions">
+                                <form method="POST" action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" class="add-to-cart-form">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary btn-full">Add to Cart</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="no-results">
+                <div class="empty-icon">🔍</div>
+                <h2>No products found</h2>
+                <p>Try adjusting your search terms or browse our categories</p>
+                <div class="suggestions">
+                    <h3>Suggestions:</h3>
+                    <ul>
+                        <li>Check your spelling</li>
+                        <li>Try more general keywords</li>
+                        <li>Try different keywords</li>
+                    </ul>
+                </div>
+                <a href="{{ url_for('main.products_list') }}" class="btn btn-primary">Browse All Products</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterResults() {
+    const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(cb => cb.value);
+    const productCards = document.querySelectorAll('.product-card');
+    
+    productCards.forEach(card => {
+        if (checkedCategories.length === 0 || checkedCategories.includes(card.dataset.category)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function updatePriceFilter(value) {
+    document.getElementById('priceValue').textContent = value;
+    const productCards = document.querySelectorAll('.product-card');
+    
+    productCards.forEach(card => {
+        const price = parseFloat(card.dataset.price);
+        card.style.display = price <= value ? 'block' : 'none';
+    });
+}
+
+function sortResults(sortBy) {
+    const container = document.querySelector('.results-grid');
+    const cards = Array.from(document.querySelectorAll('.product-card'));
+    
+    cards.sort((a, b) => {
+        const priceA = parseFloat(a.dataset.price);
+        const priceB = parseFloat(b.dataset.price);
+        
+        switch(sortBy) {
+            case 'price_low':
+                return priceA - priceB;
+            case 'price_high':
+                return priceB - priceA;
+            default:
+                return 0;
+        }
+    });
+    
+    cards.forEach(card => container.appendChild(card));
+}
+
+function clearFilters() {
+    document.querySelectorAll('input[name="category"]').forEach(cb => cb.checked = false);
+    document.getElementById('priceRange').value = 100;
+    document.getElementById('priceValue').textContent = '100';
+    document.querySelectorAll('.product-card').forEach(card => card.style.display = 'block');
+}
+</script>
+{% endblock %}

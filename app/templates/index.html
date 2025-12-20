@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Welcome to T-shirt Paradise</h1>
+        <p>Your one-stop shop for the coolest T-shirts!</p>
+        <a href="{{ url_for('main.products_list') }}" class='btn'>Shop Now</a>
+    </div>
+</section>
+
+<section class="container" id="featured-products">
+    <h2 class="section-title">Featured Products</h2>
+    <div class="products-grid">
+        {% for product in featured_products %}
+        <div class="product-card">
+            <div class="product-image">
+                <img src="{{ url_for('static', filename=product.image_url) if product.image_url else url_for('static', filename='images/placeholder.jpg') }}" alt="{{ product.name }}">
+                {% if product.discounted_price %}
+                <span class="discount-badge">-{{ product.discount_percentage }}%</span>
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description|truncate(100) }}</p>
+                <div class="product-price">
+                    {% if product.discounted_price %}
+                    <span class="original-price">${{ "%.2f"|format(product.price) }}</span>
+                    <span class="sale-price">${{ "%.2f"|format(product.discounted_price) }}</span>
+                    {% else %}
+                    <span class="price">${{ "%.2f"|format(product.price) }}</span>
+                    {% endif %}
+                </div>
+                <div class="product-actions">
+                    <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline">View Details</a>
+                    {% if current_user.is_authenticated %}
+                    <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="categories-section">
+    <div class="container">
+        <h2 class="section-title">Shop by Category</h2>
+        <div class="categories-grid">
+            {% for category in categories %}
+            <div class="category-card">
+                <h3>{{ category.name }}</h3>
+                <p>{{ category.description }}</p>
+                <a href="{{ url_for('main.products_list') }}?category_id={{ category.id }}" class="btn">Browse</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                addToCart(productId, 1);
+            });
+        });
+    });
+</script>
+{% endblock %}

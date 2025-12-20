@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Products - T-Shirt Paradise{% endblock %}
+
+{% block content %}
+<div class="container products-page">
+    <div class="page-header">
+        <h1>Our Products</h1>
+        <div class="search-sort">
+            <form method="GET" class="search-form">
+                <input type="text" name="search" placeholder="Search products..." value="{{ search }}">
+                <button type="submit">Search</button>
+            </form>
+            <select id="sort-select" onchange="window.location.href = updateUrlParameter('sort', this.value)">
+                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest First</option>
+                <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                <option value="name" {% if sort == 'name' %}selected{% endif %}>Name: A to Z</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="products-container">
+        <aside class="filters-sidebar">
+            <h3>Categories</h3>
+            <ul class="category-filters">
+                <li><a href="{{ url_for('main.products_list') }}" {% if not current_category %}class="active"{% endif %}>All Categories</a></li>
+                {% for category in categories %}
+                <li><a href="{{ url_for('main.products_list') }}?category_id={{ category.id }}" 
+                       {% if current_category == category.id %}class="active"{% endif %}>{{ category.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <div class="products-grid">
+            {% for product in products.items %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="{{ url_for('static', filename=product.image_url) if product.image_url else url_for('static', filename='images/placeholder.jpg') }}" 
+                         alt="{{ product.name }}">
+                    {% if product.discounted_price %}
+                    <span class="discount-badge">-{{ product.discount_percentage }}%</span>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">{{ product.name }}</h3>
+                    <p class="product-description">{{ product.description|truncate(100) }}</p>
+                    <div class="product-price">
+                        {% if product.discounted_price %}
+                        <span class="original-price">${{ "%.2f"|format(product.price) }}</span>
+                        <span class="sale-price">${{ "%.2f"|format(product.discounted_price) }}</span>
+                        {% else %}
+                        <span class="price">${{ "%.2f"|format(product.price) }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-stock">
+                        {% if product.stock_quantity > 0 %}
+                        <span class="in-stock">In Stock ({{ product.stock_quantity }})</span>
+                        {% else %}
+                        <span class="out-of-stock">Out of Stock</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions">
+                        <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline">View Details</a>
+                        {% if current_user.is_authenticated and product.stock_quantity > 0 %}
+                        <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        {% if products.has_prev %}
+        <a href="{{ url_for('main.products_list', page=products.prev_num, category_id=current_category, search=search, sort=sort) }}" class="page-link">Previous</a>
+        {% endif %}
+
+        {% for page_num in products.iter_pages() %}
+            {% if page_num %}
+                <a href="{{ url_for('main.products_list', page=page_num, category_id=current_category, search=search, sort=sort) }}" 
+                   class="page-link {% if page_num == products.page %}active{% endif %}">{{ page_num }}</a>
+            {% else %}
+                <span class="page-link disabled">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if products.has_next %}
+        <a href="{{ url_for('main.products_list', page=products.next_num, category_id=current_category, search=search, sort=sort) }}" class="page-link">Next</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/products.js') }}"></script>
+{% endblock %}

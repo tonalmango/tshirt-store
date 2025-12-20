@@ -1,0 +1,47 @@
+# ---- Environment files ----
+.env
+.env.*
+
+# ---- Python / Flask ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+ENV/
+
+# SQLite databases (dev)
+tshirt_store.db
+instance/*.db
+
+# Flask / Werkzeug logs & coverage
+*.log
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Uploads & generated media ----
+static/uploads/
+
+# ---- Build & distribution ----
+build/
+dist/
+*.egg-info/
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ---- Node (if added later) ----
+node_modules/
+*.tsbuildinfo

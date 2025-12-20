@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.order_number }} - T-Shirt Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="order-detail-page">
+        <div class="page-header">
+            <a href="{{ url_for('orders.order_history') }}" class="back-link">← Back to Orders</a>
+            <h1>Order Details</h1>
+        </div>
+
+        <div class="order-detail-grid">
+            <div class="order-main">
+                <div class="detail-card">
+                    <div class="card-header">
+                        <h2>Order #{{ order.order_number }}</h2>
+                        <span class="status-badge status-{{ order.status }}">{{ order.status|capitalize }}</span>
+                    </div>
+
+                    <div class="order-timeline">
+                        <div class="timeline-item {{ 'completed' if order.status in ['confirmed', 'shipped', 'delivered'] else 'active' if order.status == 'pending' else '' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Order Placed</h4>
+                                <p>{{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item {{ 'completed' if order.status in ['shipped', 'delivered'] else 'active' if order.status == 'confirmed' else '' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Order Confirmed</h4>
+                                <p>{{ 'Pending confirmation' if order.status == 'pending' else 'Confirmed' }}</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item {{ 'completed' if order.status == 'delivered' else 'active' if order.status == 'shipped' else '' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Shipped</h4>
+                                <p>{{ 'Not yet shipped' if order.status not in ['shipped', 'delivered'] else 'In transit' }}</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item {{ 'completed' if order.status == 'delivered' else '' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Delivered</h4>
+                                <p>{{ 'Awaiting delivery' if order.status != 'delivered' else 'Delivered' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="order-items-section">
+                        <h3>Order Items</h3>
+                        <div class="items-list">
+                            {% for item in order.order_items %}
+                                <div class="item-row">
+                                    <img src="{{ url_for('static', filename=item.product.image_url) if item.product.image_url else url_for('static', filename='images/placeholder.jpg') }}" alt="{{ item.product.name }}">
+                                    <div class="item-details">
+                                        <h4>{{ item.product.name }}</h4>
+                                        <p>SKU: {{ item.product.sku or 'N/A' }}</p>
+                                        <p>Quantity: {{ item.quantity }}</p>
+                                    </div>
+                                    <div class="item-pricing">
+                                        <p class="unit-price">${{ "%.2f"|format(item.price) }} each</p>
+                                        <p class="item-total">${{ "%.2f"|format(item.total_price) }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-sidebar">
+                <div class="detail-card">
+                    <h3>Order Summary</h3>
+                    <div class="summary-details">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span>${{ "%.2f"|format(order.total_amount / 1.08) }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping:</span>
+                            <span>FREE</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax (8%):</span>
+                            <span>${{ "%.2f"|format(order.total_amount - (order.total_amount / 1.08)) }}</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span>${{ "%.2f"|format(order.total_amount) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Shipping Address</h3>
+                    <div class="address-box">
+                        {{ order.shipping_address|replace('\n', '<br>')|safe }}
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Payment Information</h3>
+                    <div class="payment-info">
+                        <p><strong>Method:</strong> {{ order.payment_method|replace('_', ' ')|title }}</p>
+                        <p><strong>Status:</strong> <span class="payment-status-{{ order.payment_status }}">{{ order.payment_status|capitalize }}</span></p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-full" onclick="window.print()">Print Order</button>
+                    {% if order.status == 'delivered' %}
+                        <a href="{{ url_for('main.products_list') }}" class="btn btn-secondary btn-full">Buy Again</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    .navbar, .page-header .back-link, .action-buttons, footer { display: none; }
+    .order-detail-grid { display: block; }
+}
+</style>
+{% endblock %}

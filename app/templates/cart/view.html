@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - T-Shirt Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Your Shopping Cart</h1>
+    
+    {% if cart_items %}
+        <div class="cart-items">
+            {% for item in cart_items %}
+                <div class="cart-item">
+                    <div class="item-image">
+                        <img src="{{ url_for('static', filename=item.product.image_url) if item.product.image_url else url_for('static', filename='images/placeholder.jpg') }}" alt="{{ item.product.name }}">
+                    </div>
+                    <div class="item-details">
+                        <h3>{{ item.product.name }}</h3>
+                        <p class="item-price">${{ "%.2f"|format(item.product.final_price) }}</p>
+                        <div class="quantity-controls">
+                            <form method="POST" action="{{ url_for('cart.update_cart', item_id=item.id) }}" style="display: inline;">
+                                <input type="hidden" name="quantity" value="{{ item.quantity - 1 }}">
+                                <button type="submit" class="btn btn-sm" {% if item.quantity <= 1 %}disabled{% endif %}>-</button>
+                            </form>
+                            <span class="quantity">{{ item.quantity }}</span>
+                            <form method="POST" action="{{ url_for('cart.update_cart', item_id=item.id) }}" style="display: inline;">
+                                <input type="hidden" name="quantity" value="{{ item.quantity + 1 }}">
+                                <button type="submit" class="btn btn-sm">+</button>
+                            </form>
+                        </div>
+                        <p class="item-total">Total: ${{ "%.2f"|format(item.total_price) }}</p>
+                        <form method="POST" action="{{ url_for('cart.remove_from_cart', item_id=item.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="cart-summary">
+            <h3>Cart Total: ${{ "%.2f"|format(cart_total) }}</h3>
+            <a href="{{ url_for('orders.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+            <a href="{{ url_for('main.products_list') }}" class="btn btn-secondary">Continue Shopping</a>
+        </div>
+    {% else %}
+        <div class="empty-cart">
+            <h2>Your cart is empty</h2>
+            <p>Start shopping to add items to your cart.</p>
+            <a href="{{ url_for('main.products_list') }}" class="btn btn-primary">Shop Now</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
