@@ -15,7 +15,14 @@
         {% for product in featured_products %}
         <div class="product-card">
             <div class="product-image">
-                <img src="{{ url_for('static', filename=product.image_url) if product.image_url else url_for('static', filename='images/placeholder.jpg') }}" alt="{{ product.name }}">
+                {% set img = product.image_url %}
+                {% if img and img.startswith('http') %}
+                <img src="{{ img }}" alt="{{ product.name }}">
+                {% elif img %}
+                <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="{{ product.name }}">
+                {% endif %}
                 {% if product.discounted_price %}
                 <span class="discount-badge">-{{ product.discount_percentage }}%</span>
                 {% endif %}
