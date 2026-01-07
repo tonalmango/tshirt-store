@@ -11,11 +11,11 @@
         <div class="product-detail-image">
             {% set img = product.image_url %}
             {% if img and img.startswith('http') %}
-            <img src="{{ img }}" alt="{{ product.name }}" id="main-image">
+            <img src="{{ img }}" alt="{{ product.name }}" id="main-image" loading="lazy">
             {% elif img %}
-            <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}" id="main-image">
+            <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}" id="main-image" loading="lazy">
             {% else %}
-            <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="{{ product.name }}" id="main-image">
+            <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="{{ product.name }}" id="main-image" loading="lazy">
             {% endif %}
             
             {% if product.discounted_price %}

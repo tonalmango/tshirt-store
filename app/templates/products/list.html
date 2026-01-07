@@ -38,11 +38,11 @@
                 <div class="product-image">
                     {% set img = product.image_url %}
                     {% if img and img.startswith('http') %}
-                    <img src="{{ img }}" alt="{{ product.name }}">
+                    <img src="{{ img }}" alt="{{ product.name }}" loading="lazy">
                     {% elif img %}
-                    <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}">
+                    <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}" loading="lazy">
                     {% else %}
-                    <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="{{ product.name }}">
+                    <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="{{ product.name }}" loading="lazy">
                     {% endif %}
                     {% if product.discounted_price %}
                     <span class="discount-badge">-{{ product.discount_percentage }}%</span>
