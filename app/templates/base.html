@@ -3,10 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}T-Shirt Store{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}T-Shirt Paradise - Premium quality t-shirts for men, women, and kids. Shop stylish and comfortable tees online.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}t-shirts, clothing, men's wear, women's wear, kids' clothing, fashion{% endblock %}">
+    <meta name="author" content="T-Shirt Paradise">
+    <meta name="og:title" content="{% block og_title %}T-Shirt Paradise - Premium T-Shirts Online{% endblock %}">
+    <meta name="og:description" content="{% block og_description %}Shop premium quality t-shirts for all ages. Fast shipping and great prices!{% endblock %}">
+    <meta name="og:image" content="{{ url_for('static', filename='images/placeholder.svg', _external=True) }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#667eea">
+    <link rel="canonical" href="{{ request.url }}">
+    <title>{% block title %}T-Shirt Paradise - Premium T-Shirts Online{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/colors-and-fonts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-enhancements.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "Organization",
+        "name": "T-Shirt Paradise",
+        "url": "{{ url_for('main.index', _external=True) }}",
+        "logo": "{{ url_for('static', filename='images/placeholder.svg', _external=True) }}",
+        "description": "Premium quality t-shirts for men, women, and kids",
+        "sameAs": ["#", "#", "#"]
+    }
+    </script>
 </head>
 <body>
     <!--This is navigation header-->

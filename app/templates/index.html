@@ -1,69 +1,303 @@
 {% extends "base.html" %}
 
-{% block content %}
-<section class="hero">
-    <div class="container">
-        <h1>Welcome to T-shirt Paradise</h1>
-        <p>Your one-stop shop for the coolest T-shirts!</p>
-        <a href="{{ url_for('main.products_list') }}" class='btn'>Shop Now</a>
-    </div>
-</section>
+{% block title %}T-Shirt Paradise - Premium T-Shirts for Everyone{% endblock %}
 
-<section class="container" id="featured-products">
-    <h2 class="section-title">Featured Products</h2>
-    <div class="products-grid">
-        {% for product in featured_products %}
-        <div class="product-card">
-            <div class="product-image">
-                {% set img = product.image_url %}
-                {% if img and img.startswith('http') %}
-                <img src="{{ img }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='{{ url_for('static', filename='images/placeholder.svg') }}'">
-                {% elif img %}
-                <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='{{ url_for('static', filename='images/placeholder.svg') }}'">
-                {% else %}
-                <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="{{ product.name }}" loading="lazy">
-                {% endif %}
-                {% if product.discounted_price %}
-                <span class="discount-badge">-{{ product.discount_percentage }}%</span>
-                {% endif %}
-            </div>
-            <div class="product-info">
-                <h3 class="product-title">{{ product.name }}</h3>
-                <p class="product-description">{{ product.description|truncate(100) }}</p>
-                <div class="product-price">
-                    {% if product.discounted_price %}
-                    <span class="original-price">${{ "%.2f"|format(product.price) }}</span>
-                    <span class="sale-price">${{ "%.2f"|format(product.discounted_price) }}</span>
-                    {% else %}
-                    <span class="price">${{ "%.2f"|format(product.price) }}</span>
-                    {% endif %}
-                </div>
-                <div class="product-actions">
-                    <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline">View Details</a>
-                    {% if current_user.is_authenticated %}
-                    <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
-                    {% endif %}
-                </div>
+{% block meta_description %}Shop premium quality t-shirts for men, women, and kids. Fast shipping, great prices, and stylish designs. Discover our latest collection today!{% endblock %}
+
+{% block meta_keywords %}t-shirts, clothing store, men's t-shirts, women's t-shirts, kids' clothing, premium fashion{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section with Animation -->
+<section class="hero section-py-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1440 320\"><path fill=\"currentColor\" d=\"M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z\"></path></svg>');"></div>
+    <div class="container" style="position: relative; z-index: 1;">
+        <div style="text-align: center; animation: slideIn 0.8s ease-out;">
+            <h1 style="font-size: 4rem; font-weight: 800; margin-bottom: 1rem; animation: slideIn 0.8s ease-out;">Welcome to <span class="text-gradient-sunset">T-Shirt Paradise</span></h1>
+            <p style="font-size: 1.5rem; margin-bottom: 2rem; opacity: 0.95; animation: slideIn 0.8s ease-out 0.2s both;">Discover Premium Quality T-Shirts Crafted for Style & Comfort</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; animation: scaleIn 0.8s ease-out 0.4s both;">
+                <a href="{{ url_for('main.products_list') }}" class="btn btn-primary" style="padding: 15px 40px; font-size: 1.1rem; border-radius: 8px;">🛍️ Shop Now</a>
+                <a href="#featured" class="btn btn-outline" style="padding: 15px 40px; font-size: 1.1rem; border-radius: 8px; color: white; border-color: white;">👇 Explore</a>
             </div>
         </div>
-        {% endfor %}
     </div>
 </section>
 
-<section class="categories-section">
+<!-- Trust Badges Section -->
+<section class="section-py" style="background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%); padding: 2rem;">
     <div class="container">
-        <h2 class="section-title">Shop by Category</h2>
-        <div class="categories-grid">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center;">
+            <div style="animation: fadeIn 0.6s ease-out 0.1s both;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🚚</div>
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Fast Shipping</h3>
+                <p style="color: #666;">Free delivery on orders over $50</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.2s both;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🛡️</div>
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Secure Payment</h3>
+                <p style="color: #666;">100% safe & encrypted transactions</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.3s both;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">😊</div>
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Satisfaction Guaranteed</h3>
+                <p style="color: #666;">30-day easy returns policy</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.4s both;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">⭐</div>
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem;">Premium Quality</h3>
+                <p style="color: #666;">Best materials & craftsmanship</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="section-py-lg" id="featured" style="background: white;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem; animation: fadeIn 0.6s ease-out;">
+            <h2 class="font-display" style="font-size: 3rem; margin-bottom: 1rem;">✨ Featured Collection ✨</h2>
+            <p style="font-size: 1.2rem; color: #666; max-width: 600px; margin: 0 auto;">Handpicked styles that are trending this season. Premium quality, affordable prices.</p>
+        </div>
+        <div class="products-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            {% for product in featured_products %}
+            <div class="product-card" style="animation: scaleIn 0.4s ease-out;">
+                <div class="product-image" style="position: relative; overflow: hidden; background: linear-gradient(135deg, #667eea, #764ba2);">
+                    {% set img = product.image_url %}
+                    {% if img and img.startswith('http') %}
+                    <img src="{{ img }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='{{ url_for('static', filename='images/placeholder.svg') }}'" style="width: 100%; height: 250px; object-fit: cover; transition: transform 0.3s ease;">
+                    {% elif img %}
+                    <img src="{{ url_for('static', filename=img) }}" alt="{{ product.name }}" loading="lazy" onerror="this.src='{{ url_for('static', filename='images/placeholder.svg') }}'" style="width: 100%; height: 250px; object-fit: cover; transition: transform 0.3s ease;">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.svg') }}" alt="{{ product.name }}" loading="lazy" style="width: 100%; height: 250px; object-fit: cover;">
+                    {% endif %}
+                    {% if product.discounted_price %}
+                    <span class="badge-coral" style="position: absolute; top: 10px; right: 10px;">-{{ product.discount_percentage }}%</span>
+                    {% endif %}
+                </div>
+                <div class="product-info" style="padding: 1.5rem;">
+                    <h3 class="product-title text-coral" style="font-weight: 700; margin-bottom: 0.5rem;">{{ product.name }}</h3>
+                    <p class="product-description" style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">{{ product.description|truncate(60) }}</p>
+                    <div class="product-price" style="margin-bottom: 1rem;">
+                        {% if product.discounted_price %}
+                        <span style="text-decoration: line-through; color: #999; font-size: 0.95rem;">${{ "%.2f"|format(product.price) }}</span>
+                        <span class="text-gradient-sunset" style="font-size: 1.5rem; font-weight: 800;"> ${{ "%.2f"|format(product.discounted_price) }}</span>
+                        {% else %}
+                        <span class="text-gradient-sunset" style="font-size: 1.5rem; font-weight: 800;">${{ "%.2f"|format(product.price) }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-actions" style="display: flex; gap: 0.5rem;">
+                        <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn btn-outline" style="flex: 1; padding: 10px; font-size: 0.9rem;">Details</a>
+                        {% if current_user.is_authenticated %}
+                        <button class="btn btn-coral add-to-cart" data-product-id="{{ product.id }}" style="flex: 1; padding: 10px; font-size: 0.9rem;">Cart</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align: center; margin-top: 3rem; animation: fadeIn 0.6s ease-out 0.5s both;">
+            <a href="{{ url_for('main.products_list') }}" class="btn btn-gradient-sunset" style="padding: 15px 40px; font-size: 1.1rem;">View All Products →</a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section with Colorful Cards -->
+<section class="section-py-lg" style="background: linear-gradient(135deg, #f5f7ff 0%, #ffeef5 100%);">
+    <div class="container">
+        <h2 class="font-display text-center" style="font-size: 3rem; margin-bottom: 3rem; animation: fadeIn 0.6s ease-out;">🎨 Shop by Category 🎨</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem;">
             {% for category in categories %}
-            <div class="category-card">
-                <h3>{{ category.name }}</h3>
-                <p>{{ category.description }}</p>
-                <a href="{{ url_for('main.products_list') }}?category_id={{ category.id }}" class="btn">Browse</a>
+            <div class="card-gradient-border" style="text-align: center; background: white; animation: scaleIn 0.4s ease-out; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">
+                    {% if 'Men' in category.name %}👨
+                    {% elif 'Women' in category.name %}👩
+                    {% elif 'Kids' in category.name %}👶
+                    {% else %}👔{% endif %}
+                </div>
+                <h3 class="text-gradient-purple" style="font-weight: 700; margin-bottom: 0.5rem;">{{ category.name }}</h3>
+                <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem;">{{ category.description }}</p>
+                <a href="{{ url_for('main.products_list') }}?category_id={{ category.id }}" class="btn btn-teal" style="display: inline-block; padding: 10px 25px; border-radius: 6px;">Explore →</a>
             </div>
             {% endfor %}
         </div>
     </div>
 </section>
+
+<!-- Why Choose Us Section -->
+<section class="section-py-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="container">
+        <h2 class="font-display text-center" style="font-size: 3rem; margin-bottom: 3rem; animation: fadeIn 0.6s ease-out;">💎 Why Choose Us? 💎</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <div style="animation: fadeIn 0.6s ease-out 0.1s both;">
+                <div class="icon-bg-coral" style="margin-bottom: 1rem;">📦</div>
+                <h3 style="font-weight: 700; margin-bottom: 1rem; font-size: 1.3rem;">Curated Collection</h3>
+                <p style="opacity: 0.9;">Hand-selected t-shirts from top brands and designers worldwide.</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.2s both;">
+                <div class="icon-bg-teal" style="margin-bottom: 1rem;">💰</div>
+                <h3 style="font-weight: 700; margin-bottom: 1rem; font-size: 1.3rem;">Best Prices</h3>
+                <p style="opacity: 0.9;">Competitive pricing with regular discounts and exclusive deals.</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.3s both;">
+                <div class="icon-bg-amber" style="margin-bottom: 1rem;">🌟</div>
+                <h3 style="font-weight: 700; margin-bottom: 1rem; font-size: 1.3rem;">Quality Assured</h3>
+                <p style="opacity: 0.9;">All products pass rigorous quality checks before shipping.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features/Benefits Section -->
+<section class="section-py-lg" style="background: white;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+            <div style="animation: slideIn 0.8s ease-out;">
+                <h2 class="font-display" style="font-size: 2.5rem; margin-bottom: 1.5rem; color: #667eea;">Premium Features</h2>
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="badge-emerald">✓</div>
+                        <div>
+                            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Eco-Friendly Materials</h4>
+                            <p style="color: #666;">Made from sustainable and organic cotton.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="badge-emerald">✓</div>
+                        <div>
+                            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Perfect Fit</h4>
+                            <p style="color: #666;">Available in XS to 3XL sizes for everyone.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="badge-emerald">✓</div>
+                        <div>
+                            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Long-Lasting Colors</h4>
+                            <p style="color: #666;">Advanced dyeing process prevents fading.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="badge-emerald">✓</div>
+                        <div>
+                            <h4 style="font-weight: 700; margin-bottom: 0.5rem;">Custom Designs</h4>
+                            <p style="color: #666;">Personalize with your own graphics and prints.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="animation: fadeIn 0.8s ease-out 0.3s both;">
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 3rem; border-radius: 16px; color: white; text-align: center;">
+                    <h3 style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">50,000+</h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 2rem;">Happy Customers Worldwide</p>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <span>⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <p style="margin-top: 1rem; opacity: 0.9;">4.9/5 Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="section-py" style="background: linear-gradient(135deg, #0ba360 0%, #3cba51 100%); color: white;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 2rem; text-align: center;">
+            <div style="animation: fadeIn 0.6s ease-out 0.1s both;">
+                <h3 class="text-5xl" style="font-weight: 800; margin-bottom: 0.5rem;">10K+</h3>
+                <p style="font-size: 1.1rem;">Products</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.2s both;">
+                <h3 class="text-5xl" style="font-weight: 800; margin-bottom: 0.5rem;">50K+</h3>
+                <p style="font-size: 1.1rem;">Happy Customers</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.3s both;">
+                <h3 class="text-5xl" style="font-weight: 800; margin-bottom: 0.5rem;">150+</h3>
+                <p style="font-size: 1.1rem;">Countries</p>
+            </div>
+            <div style="animation: fadeIn 0.6s ease-out 0.4s both;">
+                <h3 class="text-5xl" style="font-weight: 800; margin-bottom: 0.5rem;">24/7</h3>
+                <p style="font-size: 1.1rem;">Support</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="section-py-lg" style="background: linear-gradient(135deg, #f5f7ff 0%, #fffaf5 100%);">
+    <div class="container">
+        <h2 class="font-display text-center" style="font-size: 3rem; margin-bottom: 3rem;">💬 What Customers Say 💬</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            <div class="card-gradient-border" style="animation: scaleIn 0.4s ease-out;">
+                <div style="margin-bottom: 1rem;">⭐⭐⭐⭐⭐</div>
+                <p style="margin-bottom: 1rem; font-style: italic; color: #555;">"Amazing quality and super fast shipping! The t-shirt fits perfectly and the colors are exactly as shown."</p>
+                <div style="font-weight: 700; color: #667eea;">Sarah Johnson</div>
+                <p style="color: #999; font-size: 0.9rem;">Verified Buyer</p>
+            </div>
+            <div class="card-gradient-border" style="animation: scaleIn 0.4s ease-out 0.1s both;">
+                <div style="margin-bottom: 1rem;">⭐⭐⭐⭐⭐</div>
+                <p style="margin-bottom: 1rem; font-style: italic; color: #555;">"Best prices I've found online! Plus, their customer service is incredibly helpful and responsive."</p>
+                <div style="font-weight: 700; color: #667eea;">Mike Chen</div>
+                <p style="color: #999; font-size: 0.9rem;">Verified Buyer</p>
+            </div>
+            <div class="card-gradient-border" style="animation: scaleIn 0.4s ease-out 0.2s both;">
+                <div style="margin-bottom: 1rem;">⭐⭐⭐⭐⭐</div>
+                <p style="margin-bottom: 1rem; font-style: italic; color: #555;">"I've bought multiple times now and never been disappointed. Highly recommend!"</p>
+                <div style="font-weight: 700; color: #667eea;">Emma Rodriguez</div>
+                <p style="color: #999; font-size: 0.9rem;">Verified Buyer</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="section-py-lg" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+    <div class="container">
+        <div style="max-width: 600px; margin: 0 auto; text-align: center; animation: slideIn 0.8s ease-out;">
+            <h2 class="font-display" style="font-size: 2.5rem; color: white; margin-bottom: 1rem;">📬 Stay Updated 📬</h2>
+            <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem; font-size: 1.1rem;">Subscribe to our newsletter for exclusive deals, new arrivals, and fashion tips!</p>
+            <form style="display: flex; gap: 0.5rem;">
+                <input type="email" placeholder="Enter your email" style="flex: 1; padding: 12px 16px; border: none; border-radius: 6px; font-size: 1rem;" required>
+                <button type="submit" class="btn btn-coral" style="padding: 12px 30px; font-weight: 700;">Subscribe</button>
+            </form>
+            <p style="color: rgba(255,255,255,0.8); margin-top: 1rem; font-size: 0.9rem;">We respect your privacy. Unsubscribe anytime.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="section-py-lg" style="background: white;">
+    <div class="container">
+        <h2 class="font-display text-center" style="font-size: 3rem; margin-bottom: 3rem;">❓ Frequently Asked Questions ❓</h2>
+        <div style="max-width: 700px; margin: 0 auto;">
+            <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; animation: fadeIn 0.6s ease-out 0.1s both;">
+                <h4 style="font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">What's your return policy?</h4>
+                <p style="color: #666;">We offer a 30-day money-back guarantee on all items. Simply contact us if you're not satisfied.</p>
+            </div>
+            <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; animation: fadeIn 0.6s ease-out 0.2s both;">
+                <h4 style="font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">How long does shipping take?</h4>
+                <p style="color: #666;">Standard shipping takes 5-7 business days. Express shipping (2-3 days) is also available.</p>
+            </div>
+            <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; animation: fadeIn 0.6s ease-out 0.3s both;">
+                <h4 style="font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">Are your t-shirts eco-friendly?</h4>
+                <p style="color: #666;">Yes! We use 100% organic cotton and eco-friendly dyeing processes for sustainability.</p>
+            </div>
+            <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; animation: fadeIn 0.6s ease-out 0.4s both;">
+                <h4 style="font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">Do you offer bulk discounts?</h4>
+                <p style="color: #666;">Yes! Contact our sales team for custom quotes on bulk orders (10+ items).</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section-py" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+    <div class="container">
+        <h2 class="font-display" style="font-size: 2.5rem; margin-bottom: 1rem; animation: slideIn 0.8s ease-out;">Ready to Find Your Perfect Tee?</h2>
+        <p style="font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9; animation: slideIn 0.8s ease-out 0.2s both;">Join thousands of happy customers shopping premium t-shirts today!</p>
+        <a href="{{ url_for('main.products_list') }}" class="btn btn-coral" style="padding: 15px 40px; font-size: 1.1rem; animation: scaleIn 0.8s ease-out 0.4s both;">Start Shopping Now →</a>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -76,6 +310,25 @@
                 const productId = this.getAttribute('data-product-id');
                 addToCart(productId, 1);
             });
+        });
+        
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.animation = 'fadeIn 0.6s ease-out';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('[style*="animation"]').forEach(el => {
+            observer.observe(el);
         });
     });
 </script>
